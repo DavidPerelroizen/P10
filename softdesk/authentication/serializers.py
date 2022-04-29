@@ -1,6 +1,6 @@
-from models import User
 from rest_framework.validators import UniqueValidator
 from rest_framework.serializers import ModelSerializer, CharField, EmailField
+from django.contrib.auth.models import User
 
 
 class UserSerializer(ModelSerializer):
