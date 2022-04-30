@@ -15,9 +15,7 @@ class UserSerializationTest(APITestCase):
                                                   email='testuser@gmail.com',password='testpassword',
                                                   first_name='testuser_first', last_name='testuser_last'
                                                   )
-        print('setUp test_user done')
         self.create_url = reverse('user-create')
-        print('create_url done')
 
     def test_create_user(self):
         data = {
@@ -38,4 +36,3 @@ class UserSerializationTest(APITestCase):
         self.assertEqual(response.data['last_name'], data['last_name'])
         self.assertEqual(response.data['email'], data['email'])
         self.assertFalse('password' in response.data)
-        print('test create user done')
