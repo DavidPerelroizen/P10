@@ -11,19 +11,21 @@ User = get_user_model()
 
 class UserSerializationTest(APITestCase):
     def setUp(self):
-        self.test_user = User.objects.create_user(first_name='testuser_first', last_name='testuser_last',
-                                                  email='testuser@gmail.com',
-                                                  password='testpassword')
+        self.test_user = User.objects.create_user(username='test_username',
+                                                  email='testuser@gmail.com',password='testpassword',
+                                                  first_name='testuser_first', last_name='testuser_last'
+                                                  )
         print('setUp test_user done')
         self.create_url = reverse('user-create')
         print('create_url done')
 
     def test_create_user(self):
         data = {
+            'username': 'someusername',
+            'email': 'foobar@gmail.com',
+            'password': 'somepassword',
             'first_name': 'foobar',
             'last_name': 'foobarlast',
-            'email': 'foobar@gmail.com',
-            'password': 'somepassword'
         }
         response = self.client.post(self.create_url, data, format='json')
         # We want to make sure we have two users in the database..
@@ -31,6 +33,7 @@ class UserSerializationTest(APITestCase):
         # And that we're returning a 201 created code.
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # Additionally, we want to return the username and email upon successful creation.
+        self.assertEqual(response.data['username'], data['username'])
         self.assertEqual(response.data['first_name'], data['first_name'])
         self.assertEqual(response.data['last_name'], data['last_name'])
         self.assertEqual(response.data['email'], data['email'])
