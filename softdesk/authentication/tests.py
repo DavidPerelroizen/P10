@@ -8,7 +8,6 @@ from rest_framework import status
 
 User = get_user_model()
 
-
 class UserSerializationTest(APITestCase):
     def setUp(self):
         self.test_user = User.objects.create_user(username='test_username',
