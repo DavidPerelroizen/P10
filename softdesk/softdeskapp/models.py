@@ -1,5 +1,5 @@
 from django.db import models
-from softdesk.softdesk import settings
+from softdeskconf import settings
 
 # Create your models here.
 
