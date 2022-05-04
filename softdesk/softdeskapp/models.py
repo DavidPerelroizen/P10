@@ -1,21 +1,27 @@
 from django.db import models
-from softdeskconf import settings
+from django.contrib.auth.models import User
+
 
 # Create your models here.
+
+
+CHOICES = (
+    ('C','create'), ('Co', 'consult')
+)
 
 
 class Projects(models.Model):
     project_id = models.IntegerField()
     title = models.CharField(max_length=30)
     description = models.CharField(max_length=3000)
-    type = models.CharField()
-    author_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    type = models.CharField(max_length=30)
+    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class Contributors(models.Model):
     user_id = models.IntegerField()
     project_id = models.IntegerField()
-    permission = models.Choices()
+    permission = models.CharField(max_length=50, choices=CHOICES)
     role = models.CharField(max_length=30)
 
 
@@ -26,14 +32,14 @@ class Issues(models.Model):
     priority = models.CharField(max_length=10)
     project_id = models.IntegerField()
     status = models.CharField(max_length=10)
-    author_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    assignee_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author')
+    assignee_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignee')
     created_time = models.DateTimeField(auto_now_add=True)
 
 
 class Comments(models.Model):
     comment_id = models.IntegerField()
     description = models.CharField(max_length=3000)
-    author_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     issue_id = models.ForeignKey(Issues, on_delete=models.CASCADE)
 
