@@ -18,7 +18,7 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from authentication.views import UserCreate
 from rest_framework import routers
-from softdesk.softdeskapp.views import ProjectsViewset
+from softdeskapp.views import ProjectsViewset
 
 router = routers.SimpleRouter()
 

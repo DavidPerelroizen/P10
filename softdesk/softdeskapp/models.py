@@ -36,16 +36,15 @@ CHOICES_STATUS = (
 
 
 class Projects(models.Model):
-    project_id = models.IntegerField()
     title = models.CharField(max_length=30)
     description = models.CharField(max_length=3000)
     type = models.CharField(max_length=30, choices=CHOICES_TYPE)
-    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author')
 
 
 class Contributors(models.Model):
-    user_id = models.IntegerField()
-    project_id = models.IntegerField()
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_id')
+    project_id = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='project_id')
     permission = models.CharField(max_length=50, choices=CHOICES_PERMISSION)
     role = models.CharField(max_length=30)
 
@@ -57,7 +56,7 @@ class Issues(models.Model):
     priority = models.CharField(max_length=10, choices=CHOICES_PRIORITY)
     project_id = models.IntegerField()
     status = models.CharField(max_length=10, choices=CHOICES_STATUS)
-    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author')
+    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='authors')
     assignee_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignee')
     created_time = models.DateTimeField(auto_now_add=True)
 
