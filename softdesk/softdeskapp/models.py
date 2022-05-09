@@ -5,6 +5,11 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 
+CHOICES_ROLE = (
+    ('A', 'author'),
+    ('CONTR', 'contributor')
+)
+
 CHOICES_PERMISSION = (
     ('C','create'), ('Co', 'consult')
 )
@@ -46,7 +51,7 @@ class Contributors(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_id')
     project_id = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='project_id')
     permission = models.CharField(max_length=50, choices=CHOICES_PERMISSION)
-    role = models.CharField(max_length=30)
+    role = models.CharField(max_length=30, choices=CHOICES_ROLE)
 
 
 class Issues(models.Model):
