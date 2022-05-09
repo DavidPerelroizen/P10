@@ -19,7 +19,7 @@ class ContributorsViewset(ModelViewSet):
     serializer_class = ContributorSerializer
     queryset = Contributors.objects.all()
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get', 'post'])
     def users(self, request, pk):
         project_contributors = Contributors.objects.filter(project_id=pk)
         serializer = self.get_serializer(project_contributors, many=True)

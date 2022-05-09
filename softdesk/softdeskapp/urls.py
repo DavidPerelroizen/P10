@@ -8,7 +8,7 @@ router = routers.SimpleRouter()
 router.register('projects', ProjectsViewset, basename='projects')
 router.register('issues', IssuesViewset, basename='issues')
 router.register('comments', CommentsViewset, basename='comments')
-router.register('contributors', ContributorsViewset, basename='contributors')
+router.register('projects/<int:pk>/users', ContributorsViewset, basename='users')
 
 urlpatterns = [
     path('', include(router.urls)),
