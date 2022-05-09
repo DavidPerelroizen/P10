@@ -5,11 +5,11 @@ from rest_framework import routers
 
 router = routers.SimpleRouter()
 
-router.register('projects', ProjectsViewset, basename='projects')
+router.register('', ProjectsViewset, basename='projects')
 router.register('issues', IssuesViewset, basename='issues')
 router.register('comments', CommentsViewset, basename='comments')
-router.register('projects/<int:pk>/users', ContributorsViewset, basename='users')
+router.register('<int:pk>/users', ContributorsViewset, basename='users')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('projects/', include(router.urls)),
     ]

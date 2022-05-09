@@ -11,7 +11,7 @@ CHOICES_ROLE = (
 )
 
 CHOICES_PERMISSION = (
-    ('C','create'), ('Co', 'consult')
+    ('C', 'CRUD'), ('R', 'READ')
 )
 
 CHOICES_TYPE = (

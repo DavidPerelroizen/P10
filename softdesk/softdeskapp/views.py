@@ -4,6 +4,7 @@ from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializ
 from .models import Projects, Contributors, Issues, Comments
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from django.contrib.auth.decorators import login_required, permission_required
 
 # Create your views here.
 
@@ -20,7 +21,7 @@ class ContributorsViewset(ModelViewSet):
     queryset = Contributors.objects.all()
 
     @action(detail=True, methods=['get', 'post'])
-    def users(self, request, pk):
+    def users(self, pk):
         project_contributors = Contributors.objects.filter(project_id=pk)
         serializer = self.get_serializer(project_contributors, many=True)
         return Response(serializer.data)
