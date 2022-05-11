@@ -49,7 +49,7 @@ class Projects(models.Model):
 
 class Contributors(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_id')
-    project_id = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='project_id')
+    project_id = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='contributors')
     permission = models.CharField(max_length=50, choices=CHOICES_PERMISSION)
     role = models.CharField(max_length=30, choices=CHOICES_ROLE)
 
