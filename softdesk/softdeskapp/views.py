@@ -1,10 +1,17 @@
 from django.shortcuts import render
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.views import APIView
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
 from .models import Projects, Contributors, Issues, Comments
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework import status
+from rest_framework.decorators import action, api_view, renderer_classes
+from rest_framework.renderers import JSONRenderer
 from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import get_object_or_404
+from django.db import models
+import json
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -16,15 +23,24 @@ class ProjectsViewset(ModelViewSet):
         return Projects.objects.all()
 
 
-class ContributorsViewset(ModelViewSet):
-    serializer_class = ContributorSerializer
-    queryset = Contributors.objects.all()
+class ContributorsAPIView(APIView):
 
-    @action(detail=True, methods=['get', 'post'])
-    def users(self, pk):
-        project_contributors = Contributors.objects.filter(project_id=pk)
-        serializer = self.get_serializer(project_contributors, many=True)
+    def get(self, request, pk):
+        print(User.objects.all())
+        contributors = Contributors.objects.get(project_id=pk)
+        serializer = ContributorSerializer(contributors)
         return Response(serializer.data)
+
+    def post(self, request, pk):
+        contributor = Contributors()
+        contributor.user_id = request.data['user_id']
+        contributor.project_id = pk
+        contributor.permission = request.data['permission']
+        contributor.role = request.data['role']
+        serializer = ContributorSerializer(contributor)
+        if serializer.is_valid():
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class IssuesViewset(ModelViewSet):
