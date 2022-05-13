@@ -57,11 +57,33 @@ class ContributorDeletion(APIView):
             print(e)
             return Response({'message': 'Contributor not found'})
 
-class IssuesViewset(ModelViewSet):
-    serializer_class = IssueSerializer
 
-    def get_queryset(self):
-        return Issues.objects.all()
+class IssuesAPIView(APIView):
+
+    def get(self, request, pk):
+        issues = Issues.objects.filter(project_id=pk)
+        serializer = IssueSerializer(issues, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        try:
+            issue = Issues()
+            issue.title = request.data['title']
+            issue.desc = request.data['desc']
+            issue.tag = request.data['tag']
+            issue.priority = request.data['priority']
+            issue.project_id = Projects.objects.get(id=pk)
+            issue.status = request.data['status']
+            issue.author_user_id = request.user.id
+            issue.assignee_user_id = request.data['assignee_user_id']
+            issue.save()
+            data = {'title': issue.title, 'desc': issue.desc, 'tag': issue.tag, 'priority': issue.priority,
+                    'project_id': issue.project_id, 'status': issue.status, 'author_user_id': issue.author_user_id,
+                    'assigner_user_id': issue.assignee_user_id, 'created_time': issue.created_time}
+            return Response(data)
+        except Exception as e:
+            print(e)
+            return Response({})
 
 
 class CommentsViewset(ModelViewSet):

@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import ProjectsViewset, IssuesViewset, CommentsViewset, ContributorsAPIView, ContributorDeletion
+from .views import ProjectsViewset, IssuesAPIView, CommentsViewset, ContributorsAPIView, ContributorDeletion
 from rest_framework import routers
 
 
@@ -13,4 +13,5 @@ urlpatterns = [
     path('projects/', include(router.urls)),
     path('projects/<int:pk>/contributors/', ContributorsAPIView.as_view(), name='contributors'),
     path('projects/<int:pk>/contributors/<int:user_id>/', ContributorDeletion.as_view(), name='delete_contributors'),
+    path('projects/<int:pk>/issues/', IssuesAPIView.as_view(), name='issues'),
     ]
