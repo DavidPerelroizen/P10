@@ -23,6 +23,7 @@ class ContributorSerializer(ModelSerializer):
 
 class ProjectSerializer(ModelSerializer):
     contributors = ContributorSerializer(many=True)
+    issues = IssueSerializer(many=True)
 
     class Meta:
         model = Projects
