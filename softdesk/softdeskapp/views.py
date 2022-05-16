@@ -87,6 +87,40 @@ class IssuesAPIView(APIView):
             return Response({'Issue posting failed'})
 
 
+class IssuesModifyAPIView(APIView):
+    def get(self, request, pk, issue_id):
+        issue_to_get = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+        serializer = IssueSerializer(issue_to_get, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request, pk, issue_id):
+        try:
+            issue_to_delete = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+            issue_to_delete.delete()
+            return Response({'message': f'Issue {issue_id} deleted'})
+        except Exception as e:
+            print(e)
+            return Response({'message': 'Issue not found'})
+
+    def put(self, request, pk, issue_id):
+        try:
+            issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+            issue_to_update = issue[0]
+            issue_to_update.title = request.data['title']
+            issue_to_update.desc = request.data['desc']
+            issue_to_update.tag = request.data['tag']
+            issue_to_update.priority = request.data['priority']
+            issue_to_update.project_id = Projects.objects.get(id=pk)
+            issue_to_update.status = request.data['status']
+            issue_to_update.author_user_id = get_object_or_404(User, id=int(request.data['author_user_id']))
+            issue_to_update.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
+            issue_to_update.save()
+            return Response({'message': f'Issue {issue_id} modified'})
+        except Exception as e:
+            print(e)
+            return Response({'message': 'Issue not found'})
+
+
 class CommentsViewset(ModelViewSet):
     serializer_class = CommentSerializer
 
