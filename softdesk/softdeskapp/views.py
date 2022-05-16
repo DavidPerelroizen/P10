@@ -121,8 +121,26 @@ class IssuesModifyAPIView(APIView):
             return Response({'message': 'Issue not found'})
 
 
-class CommentsViewset(ModelViewSet):
-    serializer_class = CommentSerializer
+class CommentsAPIView(APIView):
+    def get(self, request, pk, issue_id):
+        issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+        issue_to_get = issue[0]
+        comments = Comments.objects.filter(issue_id=issue_to_get.id)
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
 
-    def get_queryset(self):
-        return Comments.objects.all()
+    def post(self, request, pk, issue_id):
+        try:
+            issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+            issue_to_get = issue[0]
+            comment = Comments()
+            comment.description = request.data['description']
+            comment.issue_id = issue_to_get
+            comment.author_user_id = get_object_or_404(User, id=int(request.data['author_user_id']))
+            comment.save()
+            data = {'description': comment.description, 'issue_id': comment.issue_id.id,
+                    'author_user_id': comment.author_user_id.id}
+            return Response(data)
+        except Exception as e:
+            print(e)
+            return Response({'Comment posting failed'})
