@@ -74,16 +74,17 @@ class IssuesAPIView(APIView):
             issue.priority = request.data['priority']
             issue.project_id = Projects.objects.get(id=pk)
             issue.status = request.data['status']
-            issue.author_user_id = request.user.id
-            issue.assignee_user_id = request.data['assignee_user_id']
+            issue.author_user_id = get_object_or_404(User, id=int(request.data['author_user_id']))
+            issue.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
             issue.save()
             data = {'title': issue.title, 'desc': issue.desc, 'tag': issue.tag, 'priority': issue.priority,
-                    'project_id': issue.project_id, 'status': issue.status, 'author_user_id': issue.author_user_id,
-                    'assigner_user_id': issue.assignee_user_id, 'created_time': issue.created_time}
+                    'project_id': issue.project_id.id, 'status': issue.status,
+                    'author_user_id': issue.author_user_id.id,
+                    'assignee_user_id': issue.assignee_user_id.id, 'created_time': issue.created_time}
             return Response(data)
         except Exception as e:
             print(e)
-            return Response({})
+            return Response({'Issue posting failed'})
 
 
 class CommentsViewset(ModelViewSet):
