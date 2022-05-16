@@ -44,7 +44,7 @@ class ContributorsAPIView(APIView):
             return Response(data)
         except Exception as e:
             print(e)
-            return Response({})
+            return Response({'Contributor posting failed'})
 
 
 class ContributorDeletion(APIView):
