@@ -5,6 +5,7 @@ from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializ
 from .models import Projects, Contributors, Issues, Comments
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action, api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer
 from django.contrib.auth.decorators import login_required, permission_required
@@ -19,12 +20,14 @@ from django.db.models import CharField, Value, Q
 
 class ProjectsViewset(ModelViewSet):
     serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Projects.objects.all()
 
 
 class ContributorsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         contributors = Contributors.objects.filter(project_id=pk)
@@ -48,6 +51,8 @@ class ContributorsAPIView(APIView):
 
 
 class ContributorDeletion(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, pk, user_id):
         try:
             contributor_to_delete = Contributors.objects.filter(Q(project_id=pk) & Q(user_id=user_id))
@@ -59,6 +64,7 @@ class ContributorDeletion(APIView):
 
 
 class IssuesAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         issues = Issues.objects.filter(project_id=pk)
@@ -88,6 +94,8 @@ class IssuesAPIView(APIView):
 
 
 class IssuesModifyAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, pk, issue_id):
         issue_to_get = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
         serializer = IssueSerializer(issue_to_get, many=True)
@@ -122,6 +130,8 @@ class IssuesModifyAPIView(APIView):
 
 
 class CommentsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, pk, issue_id):
         issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
         issue_to_get = issue[0]
@@ -147,6 +157,8 @@ class CommentsAPIView(APIView):
 
 
 class CommentsModifyAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, pk, issue_id, comment_id):
         issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
         issue_to_get = issue[0]
