@@ -3,6 +3,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.views import APIView
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
 from .models import Projects, Contributors, Issues, Comments
+from .permissions import IsProjectCreator
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -20,7 +21,7 @@ from django.db.models import CharField, Value, Q
 
 class ProjectsViewset(ModelViewSet):
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsProjectCreator]
 
     def get_queryset(self):
         return Projects.objects.all()
