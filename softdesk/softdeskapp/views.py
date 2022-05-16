@@ -144,3 +144,37 @@ class CommentsAPIView(APIView):
         except Exception as e:
             print(e)
             return Response({'Comment posting failed'})
+
+
+class CommentsModifyAPIView(APIView):
+    def get(self, request, pk, issue_id, comment_id):
+        issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+        issue_to_get = issue[0]
+        comment = Comments.objects.filter(Q(issue_id=issue_to_get.id) & Q(id=comment_id))
+        serializer = CommentSerializer(comment, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request, pk, issue_id, comment_id):
+        try:
+            issue = get_object_or_404(Issues, Q(project_id=pk) & Q(id=issue_id))
+            comment_to_delete = get_object_or_404(Comments, Q(id=comment_id) & Q(issue_id=issue.id))
+            comment_to_delete.delete()
+            return Response({'message': f'Issue {comment_id} deleted'})
+        except Exception as e:
+            print(e)
+            return Response({'message': 'Comment not found'})
+
+    def put(self, request, pk, issue_id, comment_id):
+        try:
+            issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+            issue_to_get = issue[0]
+            comment_to_update = get_object_or_404(Comments, Q(issue_id=issue_to_get.id) & Q(id=comment_id))
+            comment_to_update.description = request.data['description']
+            comment_to_update.author_user_id = get_object_or_404(User, id=int(request.data['author_user_id']))
+            comment_to_update.issue_id = issue_to_get
+            comment_to_update.save()
+            return Response({'message': f'Issue {comment_id} modified'})
+        except Exception as e:
+            print(e)
+            return Response({'message': 'Comment not found'})
+
