@@ -171,7 +171,7 @@ class CommentsModifyAPIView(APIView):
             issue = get_object_or_404(Issues, Q(project_id=pk) & Q(id=issue_id))
             comment_to_delete = get_object_or_404(Comments, Q(id=comment_id) & Q(issue_id=issue.id))
             comment_to_delete.delete()
-            return Response({'message': f'Issue {comment_id} deleted'}, status=status.HTTP_200_OK)
+            return Response({'message': f'Comment {comment_id} deleted'}, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({'message': 'Comment not found'}, status=status.HTTP_400_BAD_REQUEST)
@@ -185,7 +185,7 @@ class CommentsModifyAPIView(APIView):
             comment_to_update.author_user_id = get_object_or_404(User, id=int(request.data['author_user_id']))
             comment_to_update.issue_id = issue_to_get
             comment_to_update.save()
-            return Response({'message': f'Issue {comment_id} modified'}, status=status.HTTP_200_OK)
+            return Response({'message': f'Comment {comment_id} modified'}, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({'message': 'Comment not found'}, status=status.HTTP_404_NOT_FOUND)
