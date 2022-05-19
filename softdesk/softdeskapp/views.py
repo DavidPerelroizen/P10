@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
 from .models import Projects, Contributors, Issues, Comments
 from .permissions import IsProjectCreator, IsProjectContributor, CanAccessCreateCommentIssue, IsIssueOwner, \
-    IsCommentOwner
+    IsCommentOwner, CanManageContributors
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -21,6 +21,9 @@ from django.db.models import CharField, Value, Q
 
 
 class ProjectsViewset(ModelViewSet):
+    """
+    This view gives the CRUD actions about Project objects
+    """
     serializer_class = ProjectSerializer
     permission_classes = [IsProjectCreator, IsProjectContributor]
 
@@ -29,7 +32,10 @@ class ProjectsViewset(ModelViewSet):
 
 
 class ContributorsAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    """
+    This view allows the user to consult or create a contributor
+    """
+    permission_classes = [CanManageContributors]
 
     def get(self, request, pk):
         contributors = Contributors.objects.filter(project_id=pk)
@@ -53,7 +59,7 @@ class ContributorsAPIView(APIView):
 
 
 class ContributorDeletion(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CanManageContributors]
 
     def get(self, request, pk, user_id):
         try:
