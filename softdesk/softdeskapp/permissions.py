@@ -9,7 +9,7 @@ class IsProjectCreator(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         requester = request.user
-        if requester == obj.author_user_id:
+        if requester.id == obj.author_user_id.id:
             return True
 
 
@@ -45,7 +45,7 @@ class IsIssueOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         requester = request.user
         issue_author_id = obj.author_user_id
-        if requester.id == issue_author_id:
+        if requester.id == issue_author_id.id:
             return True
 
 
