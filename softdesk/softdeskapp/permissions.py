@@ -25,7 +25,7 @@ class IsProjectContributor(BasePermission):
             return True
 
 
-class CanAccessCreateIssue(BasePermission):
+class CanAccessCreateCommentIssue(BasePermission):
 
     def has_permission(self, request, view):
         return bool(request.user.is_authenticated)
