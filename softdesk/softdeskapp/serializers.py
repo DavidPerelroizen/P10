@@ -9,7 +9,7 @@ class CommentSerializer(ModelSerializer):
 
 
 class IssueSerializer(ModelSerializer):
-    comments = CommentSerializer(many=True)
+    comments = CommentSerializer(many=True, required=False)
 
     class Meta:
         model = Issues
@@ -25,8 +25,8 @@ class ContributorSerializer(ModelSerializer):
 
 
 class ProjectSerializer(ModelSerializer):
-    contributors = ContributorSerializer(many=True)
-    issues = IssueSerializer(many=True)
+    contributors = ContributorSerializer(many=True, required=False)
+    issues = IssueSerializer(many=True, required=False)
 
     class Meta:
         model = Projects
