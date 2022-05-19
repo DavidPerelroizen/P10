@@ -20,15 +20,76 @@ from django.db.models import CharField, Value, Q
 # Create your views here.
 
 
-class ProjectsViewset(ModelViewSet):
-    """
-    This view gives the CRUD actions about Project objects
-    """
-    serializer_class = ProjectSerializer
-    permission_classes = [IsProjectCreator, IsProjectContributor]
+class ProjectsReadCreateAPIView(APIView):
+    permission_classes = []
 
-    def get_queryset(self):
-        return Projects.objects.all()
+    def get(self, request):
+
+        contributions = Contributors.objects.filter(user_id=request.user)
+        contributed_projects = []
+        for contribution in contributions:
+            contributed_projects.append(contribution.project_id)
+
+        projects = Projects.objects.filter(Q(author_user_id=request.user) | Q(id__in=contributed_projects))
+        serializer = ProjectSerializer(projects, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        try:
+            project = Projects()
+            project.title = request.data['title']
+            project.description = request.data['description']
+            project.type = request.data['type']
+            project.author_user_id = get_object_or_404(User, id=int(request.user.id))
+            project.save()
+
+            data = {'title': project.title, 'description': project.description, 'type': project.type,
+                    'author_user_id': project.author_user_id}
+
+            contributor = Contributors()
+            contributor.user_id = get_object_or_404(User, id=int(request.user.id))
+            contributor.project_id = project
+            contributor.permission = 'C'
+            contributor.role = 'A'
+            contributor.save()
+
+            return Response(data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(e)
+            return Response({'Project posting failed'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProjectUpdateDeleteAPIView(APIView):
+    permission_classes = []
+
+    def get(self, request, pk):
+        project = get_object_or_404(Projects, id=pk)
+        serializer = ProjectSerializer(project, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+
+        try:
+            project = get_object_or_404(Projects, id=pk)
+            project.title = request.data['title']
+            project.description = request.data['description']
+            project.type = request.data['type']
+            project.author_user_id = get_object_or_404(User, id=int(request.user.id))
+            project.save()
+        except Exception as e:
+            print(e)
+            return Response({'Project update failed'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        try:
+            project = get_object_or_404(Projects, id=pk)
+            project.delete()
+            return Response({'message': f'Project {project.id} deleted'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({'message': f'Project {project.id} could not be deleted'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContributorsAPIView(APIView):
@@ -40,7 +101,7 @@ class ContributorsAPIView(APIView):
     def get(self, request, pk):
         contributors = Contributors.objects.filter(project_id=pk)
         serializer = ContributorSerializer(contributors, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, pk):
         try:
@@ -55,7 +116,7 @@ class ContributorsAPIView(APIView):
             return Response(data, status=status.HTTP_201_CREATED)
         except Exception as e:
             print(e)
-            return Response({'Contributor posting failed'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'Contributor posting failed'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ContributorDeletion(APIView):
