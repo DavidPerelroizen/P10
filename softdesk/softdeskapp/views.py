@@ -89,7 +89,8 @@ class ProjectUpdateDeleteAPIView(APIView):
         try:
             project = get_object_or_404(Projects, id=pk)
             project.delete()
-            return Response({'message': f'Project {project.id} deleted'}, status=status.HTTP_200_OK)
+            return Response({'message': f'Project {pk} deleted'}, status=status.HTTP_200_OK)
+
         except Exception as e:
             print(e)
             return Response({'message': f'Project {project.id} could not be deleted'},
