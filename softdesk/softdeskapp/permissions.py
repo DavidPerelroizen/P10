@@ -49,3 +49,12 @@ class IsIssueOwner(BasePermission):
             return True
 
 
+class IsCommentOwner(BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user.is_authenticated)
+
+    def has_object_permission(self, request, view, obj):
+        requester = request.user
+        issue_author_id = obj.author_user_id
+        if requester.id == issue_author_id.id:
+            return True
