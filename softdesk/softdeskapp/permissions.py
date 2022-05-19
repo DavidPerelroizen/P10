@@ -4,6 +4,9 @@ from .models import Contributors
 
 class IsProjectCreator(BasePermission):
 
+    def has_permission(self, request, view):
+        return bool(request.user.is_authenticated)
+
     def has_object_permission(self, request, view, obj):
         requester = request.user
         if requester == obj.author_user_id:
@@ -11,6 +14,9 @@ class IsProjectCreator(BasePermission):
 
 
 class IsProjectContributor(BasePermission):
+
+    def has_permission(self, request, view):
+        return bool(request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
         requester = request.user

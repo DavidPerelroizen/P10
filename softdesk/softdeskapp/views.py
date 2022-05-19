@@ -21,7 +21,7 @@ from django.db.models import CharField, Value, Q
 
 class ProjectsViewset(ModelViewSet):
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated, IsProjectCreator, IsProjectContributor]
+    permission_classes = [IsProjectCreator, IsProjectContributor]
 
     def get_queryset(self):
         return Projects.objects.all()
