@@ -33,7 +33,7 @@ class ProjectsViewset(ModelViewSet):
 
 class ContributorsAPIView(APIView):
     """
-    This view allows the user to consult or create a contributor
+    This view allows the user to consult or create a contributor for a given project
     """
     permission_classes = [CanManageContributors]
 
@@ -59,6 +59,9 @@ class ContributorsAPIView(APIView):
 
 
 class ContributorDeletion(APIView):
+    """
+    This view redefines the method get in order to delete contributors from a given project
+    """
     permission_classes = [CanManageContributors]
 
     def get(self, request, pk, user_id):
@@ -72,6 +75,9 @@ class ContributorDeletion(APIView):
 
 
 class IssuesAPIView(APIView):
+    """
+    This view helps the user to consult or to create issues for a given project
+    """
     permission_classes = [CanAccessCreateCommentIssue]
 
     def get(self, request, pk):
@@ -102,6 +108,9 @@ class IssuesAPIView(APIView):
 
 
 class IssuesModifyAPIView(APIView):
+    """
+    This view helps the user to consult, delete or modify a specific issue from a specific project
+    """
     permission_classes = [IsIssueOwner]
 
     def get(self, request, pk, issue_id):
@@ -138,6 +147,9 @@ class IssuesModifyAPIView(APIView):
 
 
 class CommentsAPIView(APIView):
+    """
+    This view helps the user to consult or to create comments about a specific issue for a specific project.
+    """
     permission_classes = [CanAccessCreateCommentIssue]
 
     def get(self, request, pk, issue_id):
@@ -165,6 +177,9 @@ class CommentsAPIView(APIView):
 
 
 class CommentsModifyAPIView(APIView):
+    """
+    This view helps to consult, modify or delete a specific comment, from a specific issue, from a specific project
+    """
     permission_classes = [IsCommentOwner]
 
     def get(self, request, pk, issue_id, comment_id):
