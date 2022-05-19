@@ -21,7 +21,7 @@ from django.db.models import CharField, Value, Q
 
 
 class ProjectsReadCreateAPIView(APIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
 
@@ -61,7 +61,7 @@ class ProjectsReadCreateAPIView(APIView):
 
 
 class ProjectUpdateDeleteAPIView(APIView):
-    permission_classes = []
+    permission_classes = [IsProjectCreator]
 
     def get(self, request, pk):
         project = get_object_or_404(Projects, id=pk)
