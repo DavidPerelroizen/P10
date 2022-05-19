@@ -28,7 +28,7 @@ class ProjectsReadCreateAPIView(APIView):
         contributions = Contributors.objects.filter(user_id=request.user)
         contributed_projects = []
         for contribution in contributions:
-            contributed_projects.append(contribution.project_id)
+            contributed_projects.append(contribution.project_id.id)
 
         projects = Projects.objects.filter(Q(author_user_id=request.user) | Q(id__in=contributed_projects))
         serializer = ProjectSerializer(projects, many=True)
@@ -44,7 +44,7 @@ class ProjectsReadCreateAPIView(APIView):
             project.save()
 
             data = {'title': project.title, 'description': project.description, 'type': project.type,
-                    'author_user_id': project.author_user_id}
+                    'author_user_id': project.author_user_id.id}
 
             contributor = Contributors()
             contributor.user_id = get_object_or_404(User, id=int(request.user.id))
@@ -65,7 +65,7 @@ class ProjectUpdateDeleteAPIView(APIView):
 
     def get(self, request, pk):
         project = get_object_or_404(Projects, id=pk)
-        serializer = ProjectSerializer(project, many=True)
+        serializer = ProjectSerializer(project, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
@@ -77,6 +77,10 @@ class ProjectUpdateDeleteAPIView(APIView):
             project.type = request.data['type']
             project.author_user_id = get_object_or_404(User, id=int(request.user.id))
             project.save()
+            data = {'title': project.title, 'description': project.description, 'type': project.type,
+                    'author_user_id': project.author_user_id.id}
+            return Response(data, status=status.HTTP_201_CREATED)
+
         except Exception as e:
             print(e)
             return Response({'Project update failed'}, status=status.HTTP_400_BAD_REQUEST)
