@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from .models import Contributors
+from .models import Contributors, Issues
 
 
 class IsProjectCreator(BasePermission):
@@ -34,6 +34,18 @@ class CanAccessCreateIssue(BasePermission):
         requester = request.user
         contributors_list = Contributors.objects.filter(project_id=obj.project_id)
         if requester in contributors_list:
+            return True
+
+
+class IsIssueOwner(BasePermission):
+
+    def has_permission(self, request, view):
+        return bool(request.user.is_authenticated)
+
+    def has_object_permission(self, request, view, obj):
+        requester = request.user
+        issue_author_id = obj.author_user_id
+        if requester.id == issue_author_id:
             return True
 
 

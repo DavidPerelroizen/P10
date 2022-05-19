@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.views import APIView
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
 from .models import Projects, Contributors, Issues, Comments
-from .permissions import IsProjectCreator, IsProjectContributor, CanAccessCreateIssue
+from .permissions import IsProjectCreator, IsProjectContributor, CanAccessCreateIssue, IsIssueOwner
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -95,7 +95,7 @@ class IssuesAPIView(APIView):
 
 
 class IssuesModifyAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsIssueOwner]
 
     def get(self, request, pk, issue_id):
         issue_to_get = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
