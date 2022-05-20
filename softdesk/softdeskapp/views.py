@@ -130,7 +130,7 @@ class ContributorDeletion(APIView):
     """
     permission_classes = [CanManageContributors]
 
-    def get(self, request, pk, user_id):
+    def delete(self, request, pk, user_id):
         try:
             contributor_to_delete = Contributors.objects.filter(Q(project_id=pk) & Q(user_id=user_id))
             contributor_to_delete.delete()
