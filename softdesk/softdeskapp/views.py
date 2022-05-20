@@ -111,7 +111,7 @@ class ContributorsAPIView(APIView):
     def post(self, request, pk):
         try:
             contributor = Contributors()
-            contributor.user_id = get_object_or_404(User, id=int(request.data['user_id']))
+            contributor.user_id = get_object_or_404(User, id=int(request.user.id))
             contributor.project_id = Projects.objects.get(id=pk)
             contributor.permission = request.data['permission']
             contributor.role = request.data['role']
@@ -160,7 +160,7 @@ class IssuesAPIView(APIView):
             issue.priority = request.data['priority']
             issue.project_id = Projects.objects.get(id=pk)
             issue.status = request.data['status']
-            issue.author_user_id = get_object_or_404(User, id=int(request.data['author_user_id']))
+            issue.author_user_id = get_object_or_404(User, id=int(request.user.id))
             issue.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
             issue.save()
             data = {'title': issue.title, 'desc': issue.desc, 'tag': issue.tag, 'priority': issue.priority,
@@ -203,7 +203,7 @@ class IssuesModifyAPIView(APIView):
             issue_to_update.priority = request.data['priority']
             issue_to_update.project_id = Projects.objects.get(id=pk)
             issue_to_update.status = request.data['status']
-            issue_to_update.author_user_id = get_object_or_404(User, id=int(request.data['author_user_id']))
+            issue_to_update.author_user_id = get_object_or_404(User, id=int(request.user.id))
             issue_to_update.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
             issue_to_update.save()
             return Response({'message': f'Issue {issue_id} modified'}, status=status.HTTP_200_OK)
@@ -232,7 +232,7 @@ class CommentsAPIView(APIView):
             comment = Comments()
             comment.description = request.data['description']
             comment.issue_id = issue_to_get
-            comment.author_user_id = get_object_or_404(User, id=int(request.data['author_user_id']))
+            comment.author_user_id = get_object_or_404(User, id=int(request.user.id))
             comment.save()
             data = {'description': comment.description, 'issue_id': comment.issue_id.id,
                     'author_user_id': comment.author_user_id.id}
@@ -271,7 +271,7 @@ class CommentsModifyAPIView(APIView):
             issue_to_get = issue[0]
             comment_to_update = get_object_or_404(Comments, Q(issue_id=issue_to_get.id) & Q(id=comment_id))
             comment_to_update.description = request.data['description']
-            comment_to_update.author_user_id = get_object_or_404(User, id=int(request.data['author_user_id']))
+            comment_to_update.author_user_id = get_object_or_404(User, id=int(request.user.id))
             comment_to_update.issue_id = issue_to_get
             comment_to_update.save()
             return Response({'message': f'Comment {comment_id} modified'}, status=status.HTTP_200_OK)
