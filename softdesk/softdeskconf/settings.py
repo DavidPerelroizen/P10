@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'authentication',
     'widget_tweaks',
     'softdeskapp',
+    'drf_yasg',
 ]
 
 REST_FRAMEWORK = {
