@@ -111,7 +111,7 @@ class ContributorsAPIView(APIView):
     def post(self, request, pk):
         try:
             contributor = Contributors()
-            contributor.user_id = get_object_or_404(User, id=int(request.user.id))
+            contributor.user_id = get_object_or_404(User, id=int(request.data['user_id']))
             contributor.project_id = Projects.objects.get(id=pk)
             contributor.permission = request.data['permission']
             contributor.role = request.data['role']
