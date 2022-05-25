@@ -3,8 +3,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.views import APIView
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
 from .models import Projects, Contributors, Issues, Comments
-from .permissions import IsProjectCreator, IsProjectContributor, CanAccessCreateCommentIssue, IsIssueOwner, \
-    IsCommentOwner
+from .permissions import IsProjectCreator, IsProjectContributor, IsIssueOwner, IsCommentOwner
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -164,33 +163,49 @@ class IssuesAPIView(APIView):
     """
     This view helps the user to consult or to create issues for a given project
     """
-    permission_classes = [CanAccessCreateCommentIssue]
+    permission_classes = []
 
     def get(self, request, pk):
-        issues = Issues.objects.filter(project_id=pk)
-        serializer = IssueSerializer(issues, many=True)
-        return Response(serializer.data)
+        contributors = Contributors.objects.filter(project_id=pk)
+        contributors_id_list = []
+        for contributor in contributors:
+            contributors_id_list.append(contributor.user_id.id)
+        if request.user.id in contributors_id_list:
+            issues = Issues.objects.filter(project_id=pk)
+            serializer = IssueSerializer(issues, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': f'Authorization for getting issues from project {pk} denied'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request, pk):
-        try:
-            issue = Issues()
-            issue.title = request.data['title']
-            issue.desc = request.data['desc']
-            issue.tag = request.data['tag']
-            issue.priority = request.data['priority']
-            issue.project_id = Projects.objects.get(id=pk)
-            issue.status = request.data['status']
-            issue.author_user_id = get_object_or_404(User, id=int(request.user.id))
-            issue.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
-            issue.save()
-            data = {'title': issue.title, 'desc': issue.desc, 'tag': issue.tag, 'priority': issue.priority,
-                    'project_id': issue.project_id.id, 'status': issue.status,
-                    'author_user_id': issue.author_user_id.id,
-                    'assignee_user_id': issue.assignee_user_id.id, 'created_time': issue.created_time}
-            return Response(data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            print(e)
-            return Response({'Issue posting failed'}, status=status.HTTP_404_NOT_FOUND)
+        contributors = Contributors.objects.filter(project_id=pk)
+        contributors_id_list = []
+        for contributor in contributors:
+            contributors_id_list.append(contributor.user_id.id)
+        if request.user.id in contributors_id_list:
+            try:
+                issue = Issues()
+                issue.title = request.data['title']
+                issue.desc = request.data['desc']
+                issue.tag = request.data['tag']
+                issue.priority = request.data['priority']
+                issue.project_id = Projects.objects.get(id=pk)
+                issue.status = request.data['status']
+                issue.author_user_id = get_object_or_404(User, id=int(request.user.id))
+                issue.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
+                issue.save()
+                data = {'title': issue.title, 'desc': issue.desc, 'tag': issue.tag, 'priority': issue.priority,
+                        'project_id': issue.project_id.id, 'status': issue.status,
+                        'author_user_id': issue.author_user_id.id,
+                        'assignee_user_id': issue.assignee_user_id.id, 'created_time': issue.created_time}
+                return Response(data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                print(e)
+                return Response({'Issue posting failed'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'message': f'Authorization for creating issues in project {pk} denied'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
 
 class IssuesModifyAPIView(APIView):
@@ -236,7 +251,7 @@ class CommentsAPIView(APIView):
     """
     This view helps the user to consult or to create comments about a specific issue for a specific project.
     """
-    permission_classes = [CanAccessCreateCommentIssue]
+    permission_classes = []
 
     def get(self, request, pk, issue_id):
         issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
