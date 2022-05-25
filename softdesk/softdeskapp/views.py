@@ -193,7 +193,10 @@ class IssuesAPIView(APIView):
                 issue.project_id = Projects.objects.get(id=pk)
                 issue.status = request.data['status']
                 issue.author_user_id = get_object_or_404(User, id=int(request.user.id))
-                issue.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
+                if request.data['assignee_user_id'] == '':
+                    issue.assignee_user_id = request.user
+                else:
+                    issue.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
                 issue.save()
                 data = {'title': issue.title, 'desc': issue.desc, 'tag': issue.tag, 'priority': issue.priority,
                         'project_id': issue.project_id.id, 'status': issue.status,
@@ -243,7 +246,10 @@ class IssuesModifyAPIView(APIView):
             issue_to_update.project_id = Projects.objects.get(id=pk)
             issue_to_update.status = request.data['status']
             issue_to_update.author_user_id = get_object_or_404(User, id=int(request.user.id))
-            issue_to_update.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
+            if request.data['assignee_user_id'] == '':
+                issue_to_update.assignee_user_id = request.user
+            else:
+                issue_to_update.assignee_user_id = get_object_or_404(User, id=int(request.data['assignee_user_id']))
             issue_to_update.save()
             return Response({'message': f'Issue {issue_id} modified'}, status=status.HTTP_200_OK)
         except Exception as e:
