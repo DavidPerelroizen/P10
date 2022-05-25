@@ -1,6 +1,5 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from .models import Contributors, Issues, Projects
-from django.shortcuts import get_object_or_404
+from .models import Contributors
 
 
 class IsProjectCreator(BasePermission):
@@ -58,3 +57,4 @@ class IsCommentOwner(BasePermission):
                     return True
         else:
             return False
+

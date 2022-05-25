@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.views import APIView
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
 from .models import Projects, Contributors, Issues, Comments
@@ -7,14 +5,9 @@ from .permissions import IsProjectCreator, IsProjectContributor, IsIssueOwner, I
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action, api_view, renderer_classes
-from rest_framework.renderers import JSONRenderer
-from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import get_object_or_404
-from django.db import models
-import json
 from django.contrib.auth.models import User
-from django.db.models import CharField, Value, Q
+from django.db.models import Q
 
 # Create your views here.
 

@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path
 from .views import IssuesAPIView, IssuesModifyAPIView, ContributorsAPIView, ContributorDeletion, \
     CommentsAPIView, CommentsModifyAPIView, ProjectsReadCreateAPIView, ProjectUpdateDeleteAPIView
 from rest_framework import routers
@@ -17,3 +17,4 @@ urlpatterns = [
     path('projects/<int:pk>/issues/<int:issue_id>/comments/<int:comment_id>/', CommentsModifyAPIView.as_view(),
          name='modify_comments'),
     ]
+
