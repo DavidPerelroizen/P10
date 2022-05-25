@@ -103,7 +103,7 @@ class ContributorsAPIView(APIView):
     """
     This view allows the user to consult or create a contributor for a given project
     """
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         contributors = Contributors.objects.filter(project_id=pk)
@@ -142,7 +142,7 @@ class ContributorDeletion(APIView):
     """
     This view redefines the method get in order to delete contributors from a given project
     """
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk, user_id):
         project = get_object_or_404(Projects, id=pk)
@@ -163,7 +163,7 @@ class IssuesAPIView(APIView):
     """
     This view helps the user to consult or to create issues for a given project
     """
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         contributors = Contributors.objects.filter(project_id=pk)
@@ -216,22 +216,26 @@ class IssuesModifyAPIView(APIView):
 
     def get(self, request, pk, issue_id):
         issue_to_get = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+        self.check_object_permissions(request, issue_to_get)
         serializer = IssueSerializer(issue_to_get, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, pk, issue_id):
         try:
             issue_to_delete = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+            self.check_object_permissions(request, issue_to_delete)
             issue_to_delete.delete()
             return Response({'message': f'Issue {issue_id} deleted'}, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
-            return Response({'message': 'Issue not found'})
+            return Response({'message': f'Authorization for issue {issue_id} deletion denied'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk, issue_id):
         try:
             issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
             issue_to_update = issue[0]
+            self.check_object_permissions(request, issue_to_update)
             issue_to_update.title = request.data['title']
             issue_to_update.desc = request.data['desc']
             issue_to_update.tag = request.data['tag']
@@ -244,37 +248,54 @@ class IssuesModifyAPIView(APIView):
             return Response({'message': f'Issue {issue_id} modified'}, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
-            return Response({'message': 'Issue not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': f'Authorization for issue {issue_id} modification denied'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CommentsAPIView(APIView):
     """
     This view helps the user to consult or to create comments about a specific issue for a specific project.
     """
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk, issue_id):
-        issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
-        issue_to_get = issue[0]
-        comments = Comments.objects.filter(issue_id=issue_to_get.id)
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request, pk, issue_id):
-        try:
+        contributors = Contributors.objects.filter(project_id=pk)
+        contributors_id_list = []
+        for contributor in contributors:
+            contributors_id_list.append(contributor.user_id.id)
+        if request.user.id in contributors_id_list:
             issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
             issue_to_get = issue[0]
-            comment = Comments()
-            comment.description = request.data['description']
-            comment.issue_id = issue_to_get
-            comment.author_user_id = get_object_or_404(User, id=int(request.user.id))
-            comment.save()
-            data = {'description': comment.description, 'issue_id': comment.issue_id.id,
-                    'author_user_id': comment.author_user_id.id}
-            return Response(data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            print(e)
-            return Response({'Comment posting failed'}, status=status.HTTP_400_BAD_REQUEST)
+            comments = Comments.objects.filter(issue_id=issue_to_get.id)
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': f'Authorization for getting comments from issue {issue_id} denied'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+    def post(self, request, pk, issue_id):
+        contributors = Contributors.objects.filter(project_id=pk)
+        contributors_id_list = []
+        for contributor in contributors:
+            contributors_id_list.append(contributor.user_id.id)
+        if request.user.id in contributors_id_list:
+            try:
+                issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
+                issue_to_get = issue[0]
+                comment = Comments()
+                comment.description = request.data['description']
+                comment.issue_id = issue_to_get
+                comment.author_user_id = get_object_or_404(User, id=int(request.user.id))
+                comment.save()
+                data = {'description': comment.description, 'issue_id': comment.issue_id.id,
+                        'author_user_id': comment.author_user_id.id}
+                return Response(data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                print(e)
+                return Response({'Comment posting failed'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'message': f'Authorization for getting comments from issue {issue_id} denied'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CommentsModifyAPIView(APIView):
@@ -287,6 +308,7 @@ class CommentsModifyAPIView(APIView):
         issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
         issue_to_get = issue[0]
         comment = Comments.objects.filter(Q(issue_id=issue_to_get.id) & Q(id=comment_id))
+        self.check_object_permissions(request, comment)
         serializer = CommentSerializer(comment, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -294,6 +316,7 @@ class CommentsModifyAPIView(APIView):
         try:
             issue = get_object_or_404(Issues, Q(project_id=pk) & Q(id=issue_id))
             comment_to_delete = get_object_or_404(Comments, Q(id=comment_id) & Q(issue_id=issue.id))
+            self.check_object_permissions(request, comment_to_delete)
             comment_to_delete.delete()
             return Response({'message': f'Comment {comment_id} deleted'}, status=status.HTTP_200_OK)
         except Exception as e:
@@ -305,6 +328,7 @@ class CommentsModifyAPIView(APIView):
             issue = Issues.objects.filter(Q(project_id=pk) & Q(id=issue_id))
             issue_to_get = issue[0]
             comment_to_update = get_object_or_404(Comments, Q(issue_id=issue_to_get.id) & Q(id=comment_id))
+            self.check_object_permissions(request, comment_to_update)
             comment_to_update.description = request.data['description']
             comment_to_update.author_user_id = get_object_or_404(User, id=int(request.user.id))
             comment_to_update.issue_id = issue_to_get
