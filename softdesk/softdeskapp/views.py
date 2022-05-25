@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
 from .models import Projects, Contributors, Issues, Comments
 from .permissions import IsProjectCreator, IsProjectContributor, CanAccessCreateCommentIssue, IsIssueOwner, \
-    IsCommentOwner, CanManageContributors
+    IsCommentOwner
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -61,10 +61,11 @@ class ProjectsReadCreateAPIView(APIView):
 
 
 class ProjectUpdateDeleteAPIView(APIView):
-    permission_classes = [IsProjectCreator]
+    permission_classes = [IsProjectCreator, IsProjectContributor]
 
     def get(self, request, pk):
         project = get_object_or_404(Projects, id=pk)
+        self.check_object_permissions(request, project)
         serializer = ProjectSerializer(project, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -72,6 +73,7 @@ class ProjectUpdateDeleteAPIView(APIView):
 
         try:
             project = get_object_or_404(Projects, id=pk)
+            self.check_object_permissions(request, project)
             project.title = request.data['title']
             project.description = request.data['description']
             project.type = request.data['type']
@@ -88,6 +90,7 @@ class ProjectUpdateDeleteAPIView(APIView):
     def delete(self, request, pk):
         try:
             project = get_object_or_404(Projects, id=pk)
+            self.check_object_permissions(request, project)
             project.delete()
             return Response({'message': f'Project {pk} deleted'}, status=status.HTTP_200_OK)
 
@@ -101,43 +104,60 @@ class ContributorsAPIView(APIView):
     """
     This view allows the user to consult or create a contributor for a given project
     """
-    permission_classes = [CanManageContributors]
+    permission_classes = []
 
     def get(self, request, pk):
         contributors = Contributors.objects.filter(project_id=pk)
-        serializer = ContributorSerializer(contributors, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        contributors_id_list = []
+        for contributor in contributors:
+            contributors_id_list.append(contributor.user_id.id)
+        if request.user.id in contributors_id_list:
+            serializer = ContributorSerializer(contributors, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': f'Access to project {pk} contributors list denied'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request, pk):
-        try:
-            contributor = Contributors()
-            contributor.user_id = get_object_or_404(User, id=int(request.data['user_id']))
-            contributor.project_id = Projects.objects.get(id=pk)
-            contributor.permission = request.data['permission']
-            contributor.role = request.data['role']
-            contributor.save()
-            data = {'user_id': contributor.user_id.id, 'project_id': contributor.project_id.id,
-                    'permission': contributor.permission, 'role': contributor.role}
-            return Response(data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            print(e)
-            return Response({'message': 'Contributor posting failed'}, status=status.HTTP_404_NOT_FOUND)
+        project = get_object_or_404(Projects, id=pk)
+        if request.user.id == project.author_user_id.id:
+            try:
+                contributor = Contributors()
+                contributor.user_id = get_object_or_404(User, id=int(request.data['user_id']))
+                contributor.project_id = Projects.objects.get(id=pk)
+                contributor.permission = request.data['permission']
+                contributor.role = request.data['role']
+                contributor.save()
+                data = {'user_id': contributor.user_id.id, 'project_id': contributor.project_id.id,
+                        'permission': contributor.permission, 'role': contributor.role}
+                return Response(data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                print(e)
+                return Response({'message': 'Contributor posting failed'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'message': f'Authorization for adding contributors to project {pk} denied'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
 
 class ContributorDeletion(APIView):
     """
     This view redefines the method get in order to delete contributors from a given project
     """
-    permission_classes = [CanManageContributors]
+    permission_classes = []
 
     def delete(self, request, pk, user_id):
-        try:
-            contributor_to_delete = Contributors.objects.filter(Q(project_id=pk) & Q(user_id=user_id))
-            contributor_to_delete.delete()
-            return Response({'message': f'Contributor {user_id} deleted'})
-        except Exception as e:
-            print(e)
-            return Response({'message': 'Contributor not found'}, status=status.HTTP_404_NOT_FOUND)
+        project = get_object_or_404(Projects, id=pk)
+        if request.user.id == project.author_user_id.id:
+            try:
+                contributor_to_delete = Contributors.objects.filter(Q(project_id=pk) & Q(user_id=user_id))
+                contributor_to_delete.delete()
+                return Response({'message': f'Contributor {user_id} deleted'})
+            except Exception as e:
+                print(e)
+                return Response({'message': 'Contributor not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'message': f'Authorization for deleting contributors from project {pk} denied'},
+                            status=status.HTTP_401_UNAUTHORIZED)
 
 
 class IssuesAPIView(APIView):
