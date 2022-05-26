@@ -336,4 +336,3 @@ class CommentsModifyAPIView(APIView):
         except Exception as e:
             print(e)
             return Response({'message': 'Comment not found'}, status=status.HTTP_404_NOT_FOUND)
-

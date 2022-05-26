@@ -57,4 +57,3 @@ class IsCommentOwner(BasePermission):
                     return True
         else:
             return False
-

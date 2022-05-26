@@ -17,4 +17,3 @@ urlpatterns = [
     path('projects/<int:pk>/issues/<int:issue_id>/comments/<int:comment_id>/', CommentsModifyAPIView.as_view(),
          name='modify_comments'),
     ]
-

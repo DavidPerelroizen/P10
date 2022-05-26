@@ -31,4 +31,3 @@ class ProjectSerializer(ModelSerializer):
     class Meta:
         model = Projects
         fields = ['title', 'description', 'type', 'author_user_id', 'contributors', 'issues']
-

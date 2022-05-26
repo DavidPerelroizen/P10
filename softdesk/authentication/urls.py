@@ -5,4 +5,3 @@ from .views import UserCreate
 urlpatterns = [
     path('', UserCreate.as_view(), name='signup'),
 ]
-
