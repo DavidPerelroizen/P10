@@ -1,6 +1,10 @@
  # SOFTDESK app
 
-The Softdesk app aims at helping a community of users to .
+The SOFTDESK app is a back-end solution aiming at helping users to manage projects and their dependencies (issues, comments, contributions, etc…).
+
+Based on DJANGO REST FRAMEWORK, this app provides a collection of endpoints that the users would be able to access to from different devices and apps.
+
+This app should be secured so that only authenticated users with the right permissions could use it.
 
 ## Installation
 
